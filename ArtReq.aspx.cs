@@ -41,7 +41,7 @@ namespace DocPortal
         //this function sends an error message to the doc dept if the request is not processed
         protected void SendErrorNotice()
         {
-            string toAddress = "amy.l.white@teradyne.com,paula.hodgkins@teradyne.com";
+            string toAddress = "paula.hodgkins@mycompany.com";
             string subjectLine = "Error Notice: Media Artwork Request";
             string textBody = "There was an error processing the Media Artwork request.";
             //send the email
