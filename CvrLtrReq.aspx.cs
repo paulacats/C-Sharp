@@ -41,7 +41,7 @@ namespace DocPortal
 
         protected void SendErrorNotice()
         {
-            string toAddress = "amy.l.white@teradyne.com,paula.hodgkins@teradyne.com";
+            string toAddress = "paula.hodgkins@mycompany.com";
             string subjectLine = "Error Notice: Cover Letter Request";
             string textBody = "There was an error processing the cover letter request.";
             
