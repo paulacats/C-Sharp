@@ -20,9 +20,8 @@ namespace DocPortal
         //default constructor
         public ProcessMail()
         {
-            //toAddress = "amy.l.white@teradyne.com,david.levesque@teradyne.com,paula.hodgkins@teradyne.com,fran.sullivan@teradyne.com";
-            toAddress = "amy.l.white@teradyne.com,paula.hodgkins @teradyne.com";
-            fromAddress = "DocDept.Admin@teradyne.com";
+            toAddress = "paula.hodgkins@mycompany.com";
+            fromAddress = "DocDept.Admin@mycompany.com";
             subjectLine = "Default Subject Line";
             textBody = "";
         }
@@ -50,7 +49,7 @@ namespace DocPortal
             msg.Body = textBody;
 
             //smtp settings
-            SmtpClient client = new SmtpClient("mailhost-ec.teradyne.com");
+            SmtpClient client = new SmtpClient("mailhost-ec.mycompany.com");
             client.Port = 25;
             client.EnableSsl = false;
 
@@ -81,7 +80,7 @@ namespace DocPortal
             msg.Body = textBody;
 
             //smtp settings
-            SmtpClient client = new SmtpClient("mailhost-ec.teradyne.com");
+            SmtpClient client = new SmtpClient("mailhost-ec.mycompany.com");
             client.Port = 25;
             client.EnableSsl = false;
 
@@ -111,7 +110,7 @@ namespace DocPortal
             msg.Body = textBody;
 
             //smtp settings
-            SmtpClient client = new SmtpClient("mailhost-ec.teradyne.com");
+            SmtpClient client = new SmtpClient("mailhost-ec.mycompany.com");
             client.Port = 25;
             client.EnableSsl = false;
 
