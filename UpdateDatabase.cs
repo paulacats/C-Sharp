@@ -70,7 +70,7 @@ namespace DocPortal
                 catch (Exception)
                 {
                     //if error notify DBA
-                    string toAddress = "amy.l.white@teradyne.com,paula.hodgkins@teradyne.com";
+                    string toAddress = "paula.hodgkins@mycompany.com";
                     string subjectLine = "Error Notice: Database";
                     string textBody = "There was an error opening the database.";
 
