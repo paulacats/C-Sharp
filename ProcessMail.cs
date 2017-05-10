@@ -25,6 +25,45 @@ namespace DocPortal
             subjectLine = "Default Subject Line";
             textBody = "";
         }
+        
+        public void SendMail(string to, string cc, string from, string subj, string body)
+        {
+            this.toAddress = to;
+            this.toCC = cc;
+            this.subjectLine = subj;
+            this.textBody = body;
+
+            //create a new mail object
+            MailMessage msg = new MailMessage();
+
+            //add the mailing address
+            msg.To.Add(toAddress);
+
+            //add the cc mailing address
+            MailAddress copy = new MailAddress(toCC);
+            msg.CC.Add(copy);
+
+            //add the subject line
+            msg.Subject = subjectLine;
+
+            //set the sender's email address, convert mail object to string
+            msg.From = new MailAddress(fromAddress);
+
+            //use HTML as the format
+            msg.IsBodyHtml = true;
+
+            //create the body of the message
+            msg.Body = textBody;
+
+            //smtp settings
+            SmtpClient client = new SmtpClient("mailhost-ec.teradyne.com");
+            client.Port = 25;
+            client.EnableSsl = false;
+
+            //send the message
+            client.Send(msg);
+
+        }
 
         public void SendMail(string to, string from, string subj, string body)
         {
@@ -47,6 +86,9 @@ namespace DocPortal
 
             //create the body of the message
             msg.Body = textBody;
+            
+            //use HTML as the format
+            msg.IsBodyHtml = true;
 
             //smtp settings
             SmtpClient client = new SmtpClient("mailhost-ec.mycompany.com");
@@ -78,6 +120,9 @@ namespace DocPortal
 
             //create the body of the message
             msg.Body = textBody;
+            
+            //use HTML as the format
+            msg.IsBodyHtml = true;
 
             //smtp settings
             SmtpClient client = new SmtpClient("mailhost-ec.mycompany.com");
@@ -108,6 +153,9 @@ namespace DocPortal
 
             //create the body of the message
             msg.Body = textBody;
+            
+            //use HTML as the format
+            msg.IsBodyHtml = true;
 
             //smtp settings
             SmtpClient client = new SmtpClient("mailhost-ec.mycompany.com");
