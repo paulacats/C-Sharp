@@ -16,19 +16,13 @@ namespace DocPortal
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            //set the default calendar date
-
-            //get current date
-            var today = System.DateTime.Now;
             
-            //set the calendar date to the current date + 1 as the default
-            Calendar1.SelectedDate = today.AddDays(1);
         }
 
         protected void Calendar1_SelectionChanged(object sender, EventArgs e)
         {
             //get current date
-            var today = System.DateTime.Now;
+            var today = System.DateTime.Now.AddDays(-1);
             var chosenDate = Calendar1.SelectedDate;
 
             //if the selected date is less than today, display error message
@@ -37,17 +31,23 @@ namespace DocPortal
                 lblCalDateError.Visible = true;
             }
 
+            else
+            {
+                lblCalDateError.Visible = false;
+            }
+
         }
 
         protected void SendErrorNotice()
         {
             string toAddress = "paula.hodgkins@mycompany.com";
+            string toCC = email.Text.ToString();
             string subjectLine = "Error Notice: Cover Letter Request";
-            string textBody = "There was an error processing the cover letter request.";
+            string textBody = "There was an error processing the cover letter request." + toCC;
             
             //send the email
             ProcessMail myMail = new ProcessMail();
-            myMail.SendMail(toAddress, subjectLine, textBody);
+            myMail.SendMail(toAddress, toCC, fromAddress, subjectLine, textBody);
         }
 
         //this function gathers the text from the form fields and uses them to build the string used for either the cover letter file or the email body text
@@ -83,7 +83,7 @@ namespace DocPortal
                 if (partTxt != "")
                 {
                     //build the email string
-                    theDetails = "\r\n\r\nPART NUMBER " + i.ToString() + ": " + partTxt + "\r\n\r\nDESCRIPTION " + i.ToString() + ": " + descTxt + " OTHERINFO " + i.ToString() + ": " + otherTxt;
+                    theDetails = "<p><b>Part Number</b> " + i.ToString() + ": " + partTxt + "</p><p><b>Description</b> " + i.ToString() + ": " + descTxt + " </p><p><b>Other Info</b> " + i.ToString() + ": " + otherTxt + "</p>";
                     //add the strings together
                     allTheDetails += theDetails;
 
@@ -115,18 +115,36 @@ namespace DocPortal
         //this function sends the cover letter request to the doc group
         protected void SendCvrLtrReqMail()
         {
+            string toAddress = "paula.hodgkins@mycompany.com";
+            string fromAddress = email.Text.ToString();
             string subjectLine = "Cover Letter Request";
+            string dateNeeded;
+            
+            //check the date, if less than today, make it today
+            if (Calendar1.SelectedDate.Date < System.DateTime.Now.Date)
+            {
+                Calendar1.SelectedDate = System.DateTime.Now.Date;
+            }
+
+            //test for current date and apply formatting accordingly
+            if (Calendar1.SelectedDate == System.DateTime.Now.Date)
+            {
+                dateNeeded = "<p><font color=\"red\"><b>Date Needed By:</b> " + Calendar1.SelectedDate.ToShortDateString() + "</font></p>";
+            }
+            else
+            {
+                dateNeeded = "<p><b>Date Needed By:</b> " + Calendar1.SelectedDate.ToShortDateString() + "</p>";
+            }
 
             //indicate which format to return
             bool emailFormat = true;
             string emailDetails = fieldNameConversion(emailFormat);
 
-            string textBody = "COVER LETTER TITLE: " + cvrLtrTitle.Text.ToString() + emailDetails + "\r\n\r\nSW Download Instructions: " + swDownloadInst.Text.ToString() + "\r\n\r\nHSSub Documents: " + hssubReadme.Text.ToString() + "\r\n\r\nREVIEWERS: " + reviewers.Text.ToString() + "\r\n\r\nDATE NEEDED BY: " + Calendar1.SelectedDate.ToShortDateString() + "\r\n\r\nEmail Address: " + email.Text.ToString() + "\r\n\r\nDon't forget to pick up your htm file located here: " + @"\\atddat\DocDept\coverLetters";
+            string textBody = "<html><body><font face=\"verdana\"><p><b>Cover Letter Title:</b> " + cvrLtrTitle.Text.ToString() + "</p><p><b>Project:</b> " + drpDwnProject.SelectedItem.ToString() + emailDetails + "</p><p><b>SW Download Instructions:</b> " + swDownloadInst.Text.ToString() + "</p><p><b>HSSub Documents:</b> " + hssubReadme.Text.ToString() + "</p><p><b>Reviewers:</b> " + reviewers.Text.ToString() +  dateNeeded + "</p><p><b>Requestor's Email Address:</b> " + email.Text.ToString() + "</p><p>Don't forget to pick up your htm file located here: " + @"\\atddat\DocDept\coverLetters</p></body></html>";
             
             //send the email
             ProcessMail myMail = new ProcessMail();
-            myMail.SendMail(subjectLine, textBody);  
-
+            myMail.SendMail(toAddress, fromAddress, subjectLine, textBody); 
         }
 
         //this function creates a cover letter file using the contents of the field text. It saves the file to a folder.
@@ -163,10 +181,14 @@ namespace DocPortal
             string addr = email.Text.ToString();
             DateTime dateNeeded = Calendar1.SelectedDate;
             int requestType = 1;//for cover letters
-            
+            DateTime dateReq = System.DateTime.Now.Date;
+            TimeSpan difference = dateNeeded - dateReq;
+            int daysAllowed = (int)difference.TotalDays;
+            int projType = drpDwnProject.SelectedIndex;
+
             //update the database
-            myDB.UpdateDB(addr,dateNeeded,requestType);
-          
+            myDB.UpdateDB(addr,dateNeeded,requestType,daysAllowed, projType);
+                     
         }
 
 
