@@ -14,26 +14,24 @@ namespace DocPortal
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            //set the default calendar date
-
-            //get current date
-            var today = System.DateTime.Now;
-
-            //set the calendar date to the current date + 1 as the default
-            Calendar1.SelectedDate = today.AddDays(1);
-
+            
         }
 
         protected void Calendar1_SelectionChanged(object sender, EventArgs e)
         {
             //get current date
-            var today = System.DateTime.Now;
+            var today = System.DateTime.Now.AddDays(-1);
             var chosenDate = Calendar1.SelectedDate;
 
             //if the selected date is less than today, display error message
             if (chosenDate < today)
             {
                 lblCalDateErrorArt.Visible = true;
+            }
+
+            else
+            {
+                lblCalDateErrorArt.Visible = false;
             }
         }
 
@@ -43,21 +41,63 @@ namespace DocPortal
         {
             string toAddress = "paula.hodgkins@mycompany.com";
             string subjectLine = "Error Notice: Media Artwork Request";
-            string textBody = "There was an error processing the Media Artwork request.";
+            string textBody = "There was an error processing the Media Artwork request. Please contact the user at this email address: " + toCC;
+
             //send the email
             ProcessMail myMail = new ProcessMail();
-            myMail.SendMail(toAddress, subjectLine, textBody);
+            myMail.SendMail(toAddress, toCC, fromAddress, subjectLine, textBody); 
         }
         
         //this funciton sends the artwork request to the doc dept. It gathers the text from the form fields and adds them to the email body.
         protected void SendMediaReqMail()
         {
+            string toAddress = "paula.hodgkins@mycompany.com";
+            string fromAddress = txtEmail.Text.ToString();
             string subjectLine = "Media Artwork Request";
-            string textBody = "MEDIA TITLE: " + txtTitle.Text.ToString() + "\r\n\r\nITAR: " + radITAR.SelectedValue.ToString() + "\r\n\r\nMEDIA: " + radMedia.SelectedValue.ToString() + "\r\n\r\nPART NUMBER: " + txtPartNum.Text.ToString() + "\r\n\r\nOTHER INFO: " + txtOther.Text.ToString() + "\r\n\r\nREVIEWERS: " + txtReviewers.Text.ToString() + "\r\n\r\nDELIVER MEDIA TO: " + txtDeliver.Text.ToString() + "\r\n\r\nDATE NEEDED BY: " + Calendar1.SelectedDate.ToShortDateString() + "\r\n\r\nEmail Address: " + txtEmail.Text.ToString();
+            string otherInfo;
+            string reviewers;
+            string dateNeeded;
+            
+            //check the date, if less than today (or not selected), make it today
+            if (Calendar1.SelectedDate.Date < System.DateTime.Now.Date)
+            {
+                Calendar1.SelectedDate = System.DateTime.Now.Date;
+            }
+            
+            //test for empty fields in form; don't include in email if empty
+            if (txtOther.Text.ToString() == "")
+            {
+                otherInfo = "";
+            }
+            else
+            {
+                otherInfo = "<p><b>Other Info:</b> " + txtOther.Text.ToString() + "</p>";
+            }
+
+            if (txtReviewers.Text.ToString() == "")
+            {
+                reviewers = "";
+            }
+            else
+            {
+                reviewers = "<p><b>Reviewers:</b> " + txtReviewers.Text.ToString() + "</p>";
+            }
+
+            //test for current date and change formatting accordingly
+            if (Calendar1.SelectedDate == System.DateTime.Now.Date)
+            {                
+                dateNeeded = "<p><font color=\"red\"><b>Date Needed By:</b> " + Calendar1.SelectedDate.ToShortDateString() + "</font></p>";
+            }
+            else
+            {
+                dateNeeded = "<p><b>Date Needed By:</b> " + Calendar1.SelectedDate.ToShortDateString() + "</p>";
+            }
+
+            string textBody = "<html><body><font face=\"verdana\"><p><b>Media Title:</b> " + txtTitle.Text.ToString() + "</p><p><b>ITAR?</b>: " + radITAR.SelectedValue.ToString() + "</p><p><b>Media Type:</b> " + radMedia.SelectedValue.ToString() + "</p><p><b>Part Number:</b> " + txtPartNum.Text.ToString() + "</p><p><b>Number of Discs:</b> " + dropDwnCDs.SelectedValue.ToString() + "</p><p><b>Project:</b> " + drpDwnProject.SelectedValue.ToString() + otherInfo + reviewers + "</p><p><b>Deliver Media To:</b> " + txtDeliver.Text.ToString() + dateNeeded + "</p><p><b>Requestor's Email Address:</b> " + txtEmail.Text.ToString() + "</p></body></html>";
 
             //send the message
             ProcessMail myMail = new ProcessMail();
-            myMail.SendMail(subjectLine, textBody);
+            myMail.SendMail(toAddress, fromAddress, subjectLine, textBody);
            
         }
 
@@ -70,10 +110,15 @@ namespace DocPortal
             string addr = txtEmail.Text.ToString();
             DateTime dateNeeded = Calendar1.SelectedDate;
             int requestType = 0;//for art requests
-            
+            DateTime dateNeeded = Calendar1.SelectedDate.Date;
+            DateTime dateReq = System.DateTime.Now.Date;
+            TimeSpan difference = dateNeeded - dateReq;
+            int daysAllowed = (int)difference.TotalDays;
+            int projType = drpDwnProject.SelectedIndex;
+            int numDiscs = Convert.ToInt32(dropDwnCDs.SelectedItem.Value);
+
             //update the database
-            myDB.UpdateDB(addr, dateNeeded, requestType);
-          
+            myDB.UpdateDB(addr, dateNeeded, requestType, daysAllowed,projType, numDiscs);
         }
 
        
